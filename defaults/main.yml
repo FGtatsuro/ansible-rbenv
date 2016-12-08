@@ -1,0 +1,3 @@
+---
+# defaults file for rbenv
+rbenv_login_shell: "/bin/bash"

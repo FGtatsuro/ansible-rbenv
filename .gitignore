@@ -1,0 +1,5 @@
+roles/*
+!roles/rbenv
+
+# Ansible
+tests/*.retry

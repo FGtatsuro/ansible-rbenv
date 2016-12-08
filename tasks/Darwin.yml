@@ -1,0 +1,25 @@
+---
+# tasks file for rbenv(On OSX)
+- block:
+  - name: Check whether rbenv is installed
+    shell: "{{ rbenv_login_shell }} -lc 'rbenv versions'"
+    register: result_rbenv_versions
+    ignore_errors: yes
+    changed_when: no
+  - name: Install rbenv
+    shell: "{{ rbenv_login_shell }} -lc 'anyenv install rbenv'"
+    when: "result_rbenv_versions.rc != 0"
+  - name: Install ruby
+    shell: "{{ rbenv_login_shell }} -lc 'rbenv install {{ item }}'"
+    when: "rbenv_ruby_versions is defined and item not in result_rbenv_versions.stdout"
+    with_items: "{{ rbenv_ruby_versions }}"
+  - name: Check default version
+    shell: "{{ rbenv_login_shell }} -lc 'rbenv global'"
+    register: result_rbenv_global
+    changed_when: no
+    when: "rbenv_global_version is defined"
+  - name: Set default version
+    shell: "{{ rbenv_login_shell }} -lc 'rbenv global {{ rbenv_global_version }}'"
+    when: "rbenv_global_version is defined and rbenv_global_version not in result_rbenv_global.stdout"
+  become: yes
+  become_user: "{{ anyenv_owner }}"

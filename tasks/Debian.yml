@@ -1,0 +1,52 @@
+---
+# tasks file for rbenv(On Debian family)
+- block:
+  - name: Install requirements to build ruby
+    apt: name={{ item }} update_cache=yes cache_valid_time=3600 install_recommends=no
+    with_items:
+      - zlib1g-dev
+      - libssl-dev
+      - libreadline-dev
+      - libsqlite3-dev
+      - libbz2-dev
+  - name: Check whether rbenv is installed
+    # Alt.
+    shell: "su -l -s {{ rbenv_login_shell }} -c 'rbenv versions' {{ anyenv_owner }}"
+    # To suppress following warnings:
+    #
+    # TASK [FGtatsuro.rbenv : Install rbenv] *****************************************
+    # [WARNING]: Consider using 'become', 'become_method', and 'become_user' rather than running su
+    #
+    # Reason:
+    #   become_method doesn't work well on container.
+    #     - When become_method=sudo(default), almost containers don't have sudo command.
+    #     - When become_method=su, docker connection plugin of Ansible doesn't allow 'su' as become_method.
+    args:
+      warn: no
+    register: result_rbenv_versions
+    ignore_errors: yes
+    changed_when: no
+  - name: Install rbenv
+    shell: "su -l -s {{ rbenv_login_shell }} -c 'anyenv install rbenv' {{ anyenv_owner }}"
+    args:
+      warn: no
+    when: "result_rbenv_versions.rc != 0"
+  - name: Install ruby
+    shell: "su -l -s {{ rbenv_login_shell }} -c 'rbenv install {{ item }}' {{ anyenv_owner }}"
+    args:
+      warn: no
+    when: "rbenv_ruby_versions is defined and item not in result_rbenv_versions.stdout"
+    with_items: "{{ rbenv_ruby_versions }}"
+  - name: Check default version
+    shell: "su -l -s {{ rbenv_login_shell }} -c 'rbenv global' {{ anyenv_owner }}"
+    args:
+      warn: no
+    register: result_rbenv_global
+    changed_when: no
+    when: "rbenv_global_version is defined"
+  - name: Set default version
+    shell: "su -l -s {{ rbenv_login_shell }} -c 'rbenv global {{ rbenv_global_version }}' {{ anyenv_owner }}"
+    args:
+      warn: no
+    when: "rbenv_global_version is defined and rbenv_global_version not in result_rbenv_global.stdout"
+  become: yes
