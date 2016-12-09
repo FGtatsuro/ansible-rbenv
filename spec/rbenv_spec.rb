@@ -8,17 +8,17 @@ end
 
 
 describe command(command_base % 'rbenv versions') do
-  its(:stdout) { should contain('2.2.6') }
+  its(:stdout) { should contain('2.3.2') }
   its(:stdout) { should contain('2.3.3') }
 end
 
 describe command(command_base % 'rbenv global') do
-  its(:stdout) { should_not contain('2.2.6') }
+  its(:stdout) { should_not contain('2.3.2') }
   its(:stdout) { should contain('2.3.3') }
 end
 
 describe command(command_base % 'ruby --version') do
-  its(:stdout) { should_not contain('2.2.6') }
+  its(:stdout) { should_not contain('2.3.2') }
   its(:stdout) { should contain('2.3.3') }
 end
 

@@ -7,8 +7,6 @@
       - zlib1g-dev
       - libssl-dev
       - libreadline-dev
-      - libsqlite3-dev
-      - libbz2-dev
   - name: Check whether rbenv is installed
     # Alt.
     shell: "su -l -s {{ rbenv_login_shell }} -c 'rbenv versions' {{ anyenv_owner }}"
